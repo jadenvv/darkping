@@ -31,7 +31,7 @@ async fn get_interface(iface: &NetworkInterface) -> Option<String>
     loop{
     let mut usr_input = String::new(); 
         println!("is this interface okay yes/no? ");
-        print!(">>>");
+        print!(">>> ");
         io::stdout().flush().unwrap();
         io::stdin()
             .read_line(&mut usr_input)
@@ -41,15 +41,15 @@ async fn get_interface(iface: &NetworkInterface) -> Option<String>
         {
             println!("please specify by doing --- interface <the one you wish to use>");
             let mut usr_input = String::new(); 
-            print!(">>>");
+            print!(">>> ");
             io::stdout().flush().unwrap();
             io::stdin()
                 .read_line(&mut usr_input)
                 .expect("failed to read user input");
-            return Some(usr_input);
+            return Some(usr_input.trim().to_string());
         } 
-        else if "y" ==check.trim(){
-            return None;
+        else if "yes" ==check.trim(){
+            return Some(iface.name.clone());
         } 
     }
     
@@ -58,13 +58,16 @@ pub async fn start_cli()
 {
     
 //    init_backend().await;
-    let iface = sock::suggested_interface().await.unwrap();
+    let mut iface: NetworkInterface;
+    let suggest_iface = sock::suggested_interface().await.unwrap();
     println!("{}\n This project was created by Jaden Velasco show some love by starring the repo\n", ASCII);
     println!(" type help for documentation"); 
-    get_interface(&iface).await;
+    if let Some(interface_name) = get_interface(&suggest_iface).await {
+        iface = sock::setup_interface(&interface_name).await; 
+    }
     loop {
     let mut usr_input = String::new(); 
-        print!(">>>");
+        print!(">>> ");
         io::stdout().flush().unwrap();
         io::stdin()
             .read_line(&mut usr_input)
