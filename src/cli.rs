@@ -2,6 +2,7 @@ use std::io;
 use std::io::{Write};
 mod sock; 
 use pnet::datalink::{self, NetworkInterface};
+use pnet::packet::ethernet::EthernetPacket;
 const ASCII: &str = r#"
                                                                                      
                                                         ,,                           
@@ -24,6 +25,7 @@ async fn init_backend()
 
 
 } 
+
 async fn get_interface(iface: &NetworkInterface) -> Option<String>
 {
 
@@ -64,7 +66,11 @@ pub async fn start_cli()
     println!(" type help for documentation"); 
     if let Some(interface_name) = get_interface(&suggest_iface).await {
         iface = sock::setup_interface(&interface_name).await; 
+    } else {
+        eprintln!("no network interface found :( exiting");
+        return;
     }
+    //let comms = sock::get_mpi::<Option<EthernetPacket>>(&iface).await;
     loop {
     let mut usr_input = String::new(); 
         print!(">>> ");
@@ -72,19 +78,21 @@ pub async fn start_cli()
         io::stdin()
             .read_line(&mut usr_input)
             .expect("failed to read user input");
-        match_usr_input(&usr_input.trim()); 
+        match_usr_input(&usr_input.trim(), &comms); 
     }; 
 } 
-fn match_usr_input(usr_input: &str)
+fn match_usr_input(usr_input: &str )
 {
+    scan_cli(usr_input, &comms); 
     let output = match usr_input{
         "help" =>  HELP,
-//        "scan" => scan_cli(), 
+        "scan" => scan_cli(usr_input,&comms), 
         _ => "type help for commands\n"
     };
     print!("{}",output); 
 }
-fn scan_cli() 
+
+fn scan_cli(input: &str, comms: &sock::comm_tup<Option<EthernetPacket>>) -> str 
 {
 
 } 
