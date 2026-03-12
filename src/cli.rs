@@ -20,11 +20,6 @@ const HELP: &str = "
     1) scan - scans the network for active hosts to dark ping. \n 
     2) interace <new_interface name> - change the interface which you are listening on\n
 ";
-async fn init_backend()
-{
-
-
-} 
 
 async fn get_interface(iface: &NetworkInterface) -> Option<String>
 {
@@ -59,18 +54,21 @@ async fn get_interface(iface: &NetworkInterface) -> Option<String>
 pub async fn start_cli()
 {
     
-//    init_backend().await;
     let mut iface: NetworkInterface;
+    let mut interface_name: String; 
+    let mut iface: NetworkInterface; 
     let suggest_iface = sock::suggested_interface().await.unwrap();
     println!("{}\n This project was created by Jaden Velasco show some love by starring the repo\n", ASCII);
     println!(" type help for documentation"); 
-    if let Some(interface_name) = get_interface(&suggest_iface).await {
-        iface = sock::setup_interface(&interface_name).await; 
-    } else {
-        eprintln!("no network interface found :( exiting");
-        return;
+    loop{
+    interface_name = get_interface(&suggest_iface).await.unwrap()
+    if let Some(iface) = iface = sock::setup_interface(&interface_name).await{
+        break; 
+    }else {
+        continue; 
     }
-    //let comms = sock::get_mpi::<Option<EthernetPacket>>(&iface).await;
+    }
+    //comms is the mpi for packets or if paralell is enabled
     loop {
     let mut usr_input = String::new(); 
         print!(">>> ");
